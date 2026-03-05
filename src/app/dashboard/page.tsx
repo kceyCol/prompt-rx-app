@@ -1,9 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { getPersona } from "@/app/actions/soap-actions";
-import { SOAPGenerator } from "@/components/soap/soap-generator";
-import { PersonaSettings } from "@/components/settings/persona-settings";
-import { PromptAnalyzer } from "@/components/analyzer/prompt-analyzer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardTabs } from "@/components/dashboard/dashboard-tabs";
 import { UserButton } from "@clerk/nextjs";
 
 export default async function DashboardPage() {
@@ -25,32 +22,7 @@ export default async function DashboardPage() {
             </header>
 
             <main className="container max-w-7xl mx-auto p-4 md:p-8">
-                <Tabs defaultValue={persona ? "generator" : "settings"} className="space-y-6">
-                    <TabsList className="grid w-full max-w-[600px] grid-cols-3">
-                        <TabsTrigger value="analyzer">Prompt Analyzer</TabsTrigger>
-                        <TabsTrigger value="generator">Gerador SOAP</TabsTrigger>
-                        <TabsTrigger value="settings">Configurações</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="analyzer" className="space-y-6">
-                        <PromptAnalyzer />
-                    </TabsContent>
-
-                    <TabsContent value="generator" className="space-y-6">
-                        {!persona && (
-                            <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-lg text-yellow-800 text-sm">
-                                ⚠️ Você ainda não configurou sua persona clínica. Vá para a aba <strong>Configurações</strong> primeiro.
-                            </div>
-                        )}
-                        <SOAPGenerator />
-                    </TabsContent>
-
-                    <TabsContent value="settings">
-                        <div className="max-w-2xl">
-                            <PersonaSettings initialData={persona} />
-                        </div>
-                    </TabsContent>
-                </Tabs>
+                <DashboardTabs persona={persona} />
             </main>
         </div>
     );

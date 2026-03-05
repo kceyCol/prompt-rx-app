@@ -1,6 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY!);
 
 export async function generateSOAP({
     persona,
@@ -60,4 +62,35 @@ Retorne apenas o JSON.
         plan: typeof parsedJson.plan === 'string' ? parsedJson.plan : JSON.stringify(parsedJson.plan),
         fullMarkdown: typeof parsedJson.fullMarkdown === 'string' ? parsedJson.fullMarkdown : JSON.stringify(parsedJson.fullMarkdown) || "",
     };
+}
+
+export async function transcribeAudio(filePath: string, mimeType: string): Promise<string> {
+    const uploadResult = await fileManager.uploadFile(filePath, {
+        mimeType,
+        displayName: "audio-transcription",
+    });
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+
+    const result = await model.generateContent([
+        {
+            fileData: {
+                mimeType: uploadResult.file.mimeType,
+                fileUri: uploadResult.file.uri,
+            },
+        },
+        {
+            text: `Transcreva o áudio acima com precisão médica. 
+Regras:
+- Mantenha toda a terminologia médica exatamente como falada.
+- Use pontuação adequada para facilitar leitura.
+- Separe por parágrafos quando houver pausas longas ou mudança de assunto.
+- NÃO invente informações. Transcreva apenas o que é dito.
+- Se algum trecho estiver inaudível, marque como [inaudível].
+- Retorne APENAS o texto da transcrição, sem formatação adicional.`,
+        },
+    ]);
+
+    const response = await result.response;
+    return response.text();
 }

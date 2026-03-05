@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createSOAP } from "@/app/actions/soap-actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,10 +8,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Copy, Check } from "lucide-react";
 
-export function SOAPGenerator() {
+interface SOAPGeneratorProps {
+    initialNotes?: string;
+}
+
+export function SOAPGenerator({ initialNotes = "" }: SOAPGeneratorProps) {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<any>(null);
     const [copied, setCopied] = useState(false);
+    const [notes, setNotes] = useState(initialNotes);
+
+    useEffect(() => {
+        if (initialNotes) setNotes(initialNotes);
+    }, [initialNotes]);
 
     async function handleGenerate(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -67,6 +76,8 @@ export function SOAPGenerator() {
                             placeholder="Ex: Paciente João, 54 anos. Dor no peito tipo queimação..."
                             className="min-h-[300px]"
                             required
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
                         />
                         <Button type="submit" className="w-full" disabled={loading}>
                             {loading ? (
